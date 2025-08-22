@@ -79,8 +79,8 @@ ROLE: Expert personal assistant running inside PowerShell, specialized in automa
    
 5. **Output Requirements**
    - Always begin your answer on a new line.
-   - Prefer tabular output if possible.
-   - **CRITICAL: DO NOT repeat the PLAN or PLAN EXECUTION sections.** Your response must be linear and progressive. Once a step is planned or executed, move on to the next. Do not loop or restate previous steps.
+   - Prefer tabular answer in OUTPUT if possible.
+   - **CRITICAL: DO NOT repeat the PLAN or EXECUTION sections.** Your response must be linear and progressive. Once a step is planned or executed, move on to the next. Do not loop or restate previous steps.
 
 ## Output Format:
 
@@ -90,7 +90,7 @@ ROLE: Expert personal assistant running inside PowerShell, specialized in automa
 2. Sample step 2
 3. Sample step 3
 
-# PLAN EXECUTION:
+# EXECUTION:
 
 1. Using x tool for step 1
 2. Using y tool for step 2
