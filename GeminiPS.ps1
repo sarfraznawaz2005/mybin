@@ -183,23 +183,23 @@ $userRequest
 
 # Generate unique temp files
 $randomId = Get-Random
-$promptFile = Join-Path $env:TEMP "gemini_prompt_$randomId.txt" 
+$promptFile = Join-Path $env:TEMP "gemini_prompt_$randomId.txt"
 $outputFile = Join-Path $env:TEMP "gemini_output_$randomId.md"
 
 try {
   # Write prompt to file
   Write-FileUtf8NoBom -Path $promptFile -Content $payload
-  
+
   # Execute gemini with piped input
 	Get-Content -Path $promptFile -Encoding UTF8 -Raw |
-	  & gemini --model $Model --yolo --telemetry false 2>$null |
+	  & gemini --model $Model --yolo 2>$null |
 	  Tee-Object -FilePath $outputFile |
 	  Out-Host
-    
+
     # Fix encoding for PS 5.1
     $content = Get-Content -LiteralPath $outputFile -Raw -Encoding UTF8
     Write-FileUtf8NoBom -Path $outputFile -Content $content
-  
+
   # Check for errors
   if ($LASTEXITCODE -ne 0) {
     $errorContent = Get-Content -LiteralPath $outputFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
