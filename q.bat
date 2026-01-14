@@ -8,4 +8,4 @@ set "PAYLOAD=%SYSTEM% ^|^|^| USER REQUEST: %USER%"
 
 rem echo %PAYLOAD%
 
-gemini --extensions none --model gemini-2.5-flash --yolo "%PAYLOAD%"
+qwen --extensions none --yolo "%PAYLOAD%"
