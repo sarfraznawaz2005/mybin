@@ -8,4 +8,4 @@ set "PAYLOAD=%SYSTEM% ^|^|^| USER REQUEST: %USER%"
 
 rem echo %PAYLOAD%
 
-qwen --extensions none --yolo "%PAYLOAD%"
+agent "%PAYLOAD%"
