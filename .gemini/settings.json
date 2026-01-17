@@ -1,0 +1,32 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "gemini-api-key"
+    },
+	"experimental": {
+		"extensionManagement": false
+	},
+	"general": {
+		"previewFeatures": false,
+		"enablePromptCompletion": false,
+		"sessionRetention": {
+		  "enabled": false
+		}
+	},
+	"security": {"enablePermanentToolApproval": true},
+	"hooks": {"enabled": false},
+	"admin": {
+		"extensions" : {"enabled": false},
+		"mcp" : {"enabled": false},
+		"skills" : {"enabled": false}
+	},
+    "mcpServers": {},
+    "mcp": {"allowed" : []},
+	"telemetry": {
+		"enabled": false
+	},
+	"privacy": {
+		"usageStatisticsEnabled": false
+	}	
+  }
+}

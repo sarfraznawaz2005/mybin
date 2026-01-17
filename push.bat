@@ -17,4 +17,3 @@ echo %ESC%[92m-- AI Operation Verification --%ESC%[0m
 
 git status
 git push
-pause
