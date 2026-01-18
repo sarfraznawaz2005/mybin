@@ -7,7 +7,7 @@ git pull
 git status
 git add .
 
-start /wait cmd /c "ok Make git commit message. For making up commit message, try to find out core stuff that was changed by seeing diffs and make commit message based on that. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Finally git commit. && pause"
+start /wait cmd /c "agent Make git commit message. For making up commit message, try to find out core stuff that was changed by seeing diffs and make commit message based on that. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Finally git commit. && pause"
 
 git status
 git push 
