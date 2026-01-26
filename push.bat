@@ -56,12 +56,6 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
 git status 2>nul
 
-:: show last commit message (from git history) in yellow before pushing
-:: get the last commit message subject directly without using temp file
-for /f "delims=" %%M in ('git log -1 --pretty^=format:"%%s"') do set "LAST_COMMIT=%%M"
-echo %CYAN%[93mLast commit by AI:%CYAN%[0m
-echo %CYAN%[93m%LAST_COMMIT%%CYAN%[0m
-
 git push
 set PUSH_RESULT=%ERRORLEVEL%
 if not "%PUSH_RESULT%"=="0" (
@@ -116,7 +110,7 @@ if exist "%MSG_FILE%" del "%MSG_FILE%"
 
 :: Check if we got a commit message, if not abort everything
 if defined COMMIT_MSG (
-    echo Commit message generated: %COMMIT_MSG%
+    echo %CYAN%[93m%LAST_COMMIT%%CYAN%[0m
     git commit -m "%COMMIT_MSG%"
 ) else (
     echo.
