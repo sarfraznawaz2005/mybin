@@ -46,10 +46,6 @@ del "%COMMIT_OUT%"
 
 del "%PROMPT_FILE%"
 
-del "%COMMIT_OUT%"
-
-del "%PROMPT_FILE%"
-
 pause
 
 git status
