@@ -7,13 +7,13 @@ for /f %%a in ('echo prompt $E^| cmd') do set "CLR=%%a"
 
 echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mPulling Remote Changes...%CLR%[0m
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 git pull
 
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mAdding Files...%CLR%[0m
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 :: Check if there are any changes to commit (either staged or unstaged)
 set CHANGES_FOUND=false
@@ -25,14 +25,14 @@ if "%CHANGES_FOUND%" == "true" (
   goto :done_checking
 )
 
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mNothing to commit, skipping AI commit message...%CLR%[0m
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 :: Even if there's nothing to commit, we might still need to push if we have commits that haven't been pushed
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mChecking for commits to push...%CLR%[0m
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 :done_checking
 
@@ -42,19 +42,19 @@ for /f %%a in ('git rev-list --count @{u}..HEAD 2^>nul') do set "COMMITS_TO_PUSH
 
 :: Only proceed with push if there are commits to push
 if "%COMMITS_TO_PUSH%"=="0" (
-    echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+    echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
     echo %CLR%[38;2;0;255;255mNo commits to push, skipping push step...%CLR%[0m
-    echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+    echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
     
-	echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+	echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 	echo %CLR%[38;2;0;255;255mDONE!%CLR%[0m
-	echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m    
+	echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m    
     goto :eof
 )
 
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mPushing...%CLR%[0m
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 git push
 set PUSH_RESULT=%ERRORLEVEL%
@@ -65,9 +65,9 @@ if not "%PUSH_RESULT%"=="0" (
     exit /b %PUSH_RESULT%
 )
 
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mDONE!%CLR%[0m
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 goto :eof
 
@@ -75,9 +75,9 @@ goto :eof
 git add . 2>nul
 git status 2>nul
 
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mMaking Commit Message...%CLR%[0m
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 :: build prompt file and capture git diff HEAD truncated to 50000 bytes so we don't bombard AI with lot of context consuming our tokens!
 set "FULL=%TEMP%\git_diff_full.txt"
