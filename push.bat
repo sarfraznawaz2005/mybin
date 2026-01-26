@@ -34,15 +34,11 @@ for /f %%a in ('git rev-list --count @{u}..HEAD 2^>nul') do set "COMMITS_TO_PUSH
 
 :: Only proceed with push if there are commits to push
 if "%COMMITS_TO_PUSH%"=="0" (
-    echo %CYAN%[106m----------------------------------------%CYAN%[0m
     echo %CYAN%[106mNo commits to push, skipping push step...%CYAN%[0m
-    echo %CYAN%[106m----------------------------------------%CYAN%[0m
     goto :eof
 )
 
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 echo %CYAN%[106mPushing...%CYAN%[0m
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
 git push
 set PUSH_RESULT=%ERRORLEVEL%
@@ -53,9 +49,7 @@ if not "%PUSH_RESULT%"=="0" (
     exit /b %PUSH_RESULT%
 )
 
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 echo %CYAN%[106mDONE!%CYAN%[0m
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
 goto :eof
 
@@ -63,9 +57,7 @@ goto :eof
 git add . 2>nul
 git status 2>nul
 
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 echo %CYAN%[106mMaking Commit Message...%CYAN%[0m
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
 :: build prompt file and capture git diff HEAD truncated to 50000 bytes so we don't bombard AI with lot of context consuming our tokens!
 set "FULL=%TEMP%\git_diff_full.txt"
