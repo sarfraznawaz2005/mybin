@@ -7,7 +7,23 @@ git pull
 git status
 git add .
 
-start /wait cmd /c "agent Make git commit message. For making up commit message, try to find out core stuff that was changed by seeing diffs and make commit message based on that. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Finally git commit. && pause"
+:: build prompt file and capture git diff HEAD truncated to 50000 bytes (cmd-compatible)
+set "FULL=%TEMP%\git_diff_full.txt"
+set "TRUNC=%TEMP%\git_diff_trunc.txt"
+set "PROMPT_FILE=%TEMP%\git_diff_prompt.txt"
+(echo ^(=== Summary ===^) ) > "%PROMPT_FILE%"
+git diff HEAD --stat >> "%PROMPT_FILE%"
+echo. >> "%PROMPT_FILE%"
+(echo ^(=== Diff ^(truncated if large^) ===^) ) >> "%PROMPT_FILE%"
+:: use PowerShell to write full diff to file, then write first 50000 bytes to trunc and append to prompt file
+powershell -NoProfile -Command "git diff HEAD | Out-File -FilePath '%FULL%' -Encoding UTF8; $b=[System.IO.File]::ReadAllBytes('%FULL%'); $len=[System.Math]::Min(50000,$b.Length); [System.IO.File]::WriteAllBytes('%TRUNC%',$b[0..($len-1)]); Get-Content -Encoding UTF8 -Path '%TRUNC%' | Out-File -FilePath '%PROMPT_FILE%' -Encoding UTF8 -Append; Remove-Item '%FULL%','%TRUNC%'"
+
+:: pipe prompt into agent
+type "%PROMPT_FILE%" | agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Finally perform git commit with made message."
+
+del "%PROMPT_FILE%"
+
+pause
 
 git status
 git push 
