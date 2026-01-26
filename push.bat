@@ -38,6 +38,10 @@ if not "%AI_MSG%"=="" (
   git commit -m "%AI_MSG%"
 ) else (
   echo No commit message received from agent; aborting git commit.
+  del "%COMMIT_OUT%"
+  del "%PROMPT_FILE%"
+  echo %ESC%[91mOperation aborted: AI did not provide a commit message.%ESC%[0m
+  exit /b 1
 )
 
 del "%COMMIT_OUT%"
