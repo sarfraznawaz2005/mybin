@@ -12,7 +12,7 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 git pull
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mAdd Files...%CYAN%[0m
+echo %CYAN%[36mAdding Files...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
 git status 2>nul
