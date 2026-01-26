@@ -5,15 +5,11 @@ for /f %%a in ('echo prompt $E^| cmd') do (
 
 for /f %%a in ('echo prompt $E^| cmd') do set "CYAN=%%a"
 
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 echo %CYAN%[106mPulling Remote Changes...%CYAN%[0m
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
 git pull
 
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 echo %CYAN%[106mAdding Files...%CYAN%[0m
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
 :: Check if there are any changes to commit (either staged or unstaged)
 set CHANGES_FOUND=false
@@ -25,14 +21,10 @@ if "%CHANGES_FOUND%" == "true" (
   goto :done_checking
 )
 
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 echo %CYAN%[106mNothing to commit, skipping commit step...%CYAN%[0m
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
 :: Even if there's nothing to commit, we might still need to push if we have commits that haven't been pushed
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 echo %CYAN%[106mChecking for commits to push...%CYAN%[0m
-echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
 :done_checking
 
