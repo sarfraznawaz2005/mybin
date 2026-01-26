@@ -101,11 +101,14 @@ powershell -NoProfile -Command "git diff HEAD | Out-File -FilePath '%FULL%' -Enc
 set "MSG_FILE=%TEMP%\commit_msg.txt"
 
 :: use PowerShell to pipe the prompt file to agent and capture output
-powershell -Command "Get-Content '%PROMPT_FILE%' | agent \"Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Return only the commit message, nothing else.\" | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
+powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent \"Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Return only the commit message, nothing else.\" | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
 
 del "%PROMPT_FILE%"
 
-:: read the commit message from the temp file
+:: use PowerShell to read the commit message and strip BOM
+powershell -NoProfile -Command "$content = Get-Content -Raw -Path '%MSG_FILE%' -Encoding UTF8; $content = $content -replace '^'\"`u{EFBBBF}`"''; $content.Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII"
+
+:: read the cleaned commit message
 set /p COMMIT_MSG=<"%MSG_FILE%"
 
 :: delete the temp file
