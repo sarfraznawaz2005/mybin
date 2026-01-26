@@ -50,15 +50,16 @@ for /f "delims=" %%M in ('git log -1 --pretty^=format^:^"%s"') do set "LAST_COMM
 echo %ESC%[93mLast commit by AI:%ESC%[0m
 echo %ESC%[93m%LAST_COMMIT%%ESC%[0m
 
-git push && (
-    echo %CYAN%[36m----------------------------------------%CYAN%[0m
-    echo %CYAN%[36mDONE!%CYAN%[0m
-    echo %CYAN%[36m----------------------------------------%CYAN%[0m
-) || (
+git push
+if errorlevel 1 (
     echo.
     echo Git push failed.
     echo.
     exit /b 1
+) else (
+    echo %CYAN%[36m----------------------------------------%CYAN%[0m
+    echo %CYAN%[36mDONE!%CYAN%[0m
+    echo %CYAN%[36m----------------------------------------%CYAN%[0m
 )
 
 goto :eof
