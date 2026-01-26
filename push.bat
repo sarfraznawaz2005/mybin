@@ -15,7 +15,7 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mAdd Files...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
-git status
+git status 2>nul
 
 :: Check if there are any changes to commit (either staged or unstaged)
 set CHANGES_FOUND=false
@@ -54,7 +54,7 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mPushing...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
-git status
+git status 2>nul
 
 :: show last commit message (from git history) in yellow before pushing
 :: get the last commit message subject directly without using temp file
@@ -80,7 +80,7 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 goto :eof
 
 :do_commit
-git add .
+git add . 2>nul
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mMaking Commit Message...%CYAN%[0m
