@@ -33,12 +33,20 @@ echo. >> "%PROMPT_FILE%"
 :: use PowerShell to write full diff to file, then write first 50000 bytes to trunc and append to prompt file
 powershell -NoProfile -Command "git diff HEAD | Out-File -FilePath '%FULL%' -Encoding UTF8; $b=[System.IO.File]::ReadAllBytes('%FULL%'); $len=[System.Math]::Min(50000,$b.Length); [System.IO.File]::WriteAllBytes('%TRUNC%',$b[0..($len-1)]); Get-Content -Encoding UTF8 -Path '%TRUNC%' | Out-File -FilePath '%PROMPT_FILE%' -Encoding UTF8 -Append; Remove-Item '%FULL%','%TRUNC%'"
 
-:: pipe prompt into agent
-type "%PROMPT_FILE%" | agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Finally perform git commit with made message."
+:: pipe prompt into agent to get the commit message
+for /f "usebackq delims=" %%M in (`type "%PROMPT_FILE%" ^| agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Return only the commit message, nothing else."`) do set "COMMIT_MSG=%%M"
 
 del "%PROMPT_FILE%"
 
-pause
+:: Check if we got a commit message, if not abort everything
+if defined COMMIT_MSG (
+    git commit -m "%COMMIT_MSG%"
+) else (
+    echo.
+    echo AI failed to generate commit message. Aborting...
+    echo.
+    exit /b 1
+)
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mPushing...%CYAN%[0m
