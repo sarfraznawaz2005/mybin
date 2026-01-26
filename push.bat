@@ -21,15 +21,44 @@ git status
 set CHANGES_FOUND=false
 for /f "delims=" %%a in ('git status --porcelain') do set "CHANGES_FOUND=true"
 
-:: Process based on whether changes were found
+:: Only proceed with commit if changes were found
 if "%CHANGES_FOUND%" == "true" (
-    goto :process_changes
-) else (
-    goto :no_changes
+  call :do_commit
+  goto :done_checking
 )
 
-:process_changes
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mNothing to commit, skipping commit step...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
+:: Even if there's nothing to commit, we might still need to push if we have commits that haven't been pushed
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mChecking for commits to push...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
+:done_checking
+
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mPushing...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
+git status
+
+:: show last commit message (from git history) in yellow before pushing
+:: get the last commit message subject directly without using temp file
+for /f "delims=" %%M in ('git log -1 --pretty^=format^:^"%s"') do set "LAST_COMMIT=%%M"
+echo %ESC%[93mLast commit by AI:%ESC%[0m
+echo %ESC%[93m%LAST_COMMIT%%ESC%[0m
+
+git push
+
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mDONE!%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
+goto :eof
+
+:do_commit
 git add .
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
@@ -71,35 +100,4 @@ if defined COMMIT_MSG (
     echo.
     exit /b 1
 )
-
-goto :continue_with_push
-
-:no_changes
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mNothing to commit, skipping commit step...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-
-:: Even if there's nothing to commit, we might still need to push if we have commits that haven't been pushed
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mChecking for commits to push...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-
-:continue_with_push
-
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mPushing...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-
-git status
-
-:: show last commit message (from git history) in yellow before pushing
-:: get the last commit message subject directly without using temp file
-for /f "delims=" %%M in ('git log -1 --pretty^=format^:^"%s"') do set "LAST_COMMIT=%%M"
-echo %ESC%[93mLast commit by AI:%ESC%[0m
-echo %ESC%[93m%LAST_COMMIT%%ESC%[0m
-
-git push
-
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mDONE!%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+goto :eof
