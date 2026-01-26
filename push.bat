@@ -79,7 +79,7 @@ echo %CYAN%[92m----------------------------------------%CYAN%[0m
 echo %CYAN%[92mMaking Commit Message...%CYAN%[0m
 echo %CYAN%[92m----------------------------------------%CYAN%[0m
 
-:: build prompt file and capture git diff HEAD truncated to 50000 bytes so we dont bombard AI with lot of context consuming our tokens!
+:: build prompt file and capture git diff HEAD truncated to 50000 bytes so we don't bombard AI with lot of context consuming our tokens!
 set "FULL=%TEMP%\git_diff_full.txt"
 set "TRUNC=%TEMP%\git_diff_trunc.txt"
 set "PROMPT_FILE=%TEMP%\git_diff_prompt.txt"
