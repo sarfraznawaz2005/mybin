@@ -52,7 +52,7 @@ echo %ESC%[93m%LAST_COMMIT%%ESC%[0m
 
 git push
 set PUSH_RESULT=%ERRORLEVEL%
-if %PUSH_RESULT% neq 0 (
+if not "%PUSH_RESULT%"=="0" (
     echo.
     echo Git push failed with error %PUSH_RESULT%
     echo.
