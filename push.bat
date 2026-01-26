@@ -67,6 +67,7 @@ if not "%PUSH_RESULT%"=="0" (
 
 ping 127.0.0.1 -n 3 >nul
 
+git push
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mDONE!%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
