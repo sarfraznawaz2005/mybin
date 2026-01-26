@@ -5,7 +5,7 @@ for /f %%a in ('echo prompt $E^| cmd') do (
 
 for /f %%a in ('echo prompt $E^| cmd') do set "CLR=%%a"
 
-echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 echo %CLR%[38;2;0;255;255mPulling Remote Changes...%CLR%[0m
 echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
 
