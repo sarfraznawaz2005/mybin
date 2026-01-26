@@ -15,7 +15,7 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mAdding Files...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
-git status 2>nul
+git status
 
 :: Check if there are any changes to commit (either staged or unstaged)
 set CHANGES_FOUND=false
