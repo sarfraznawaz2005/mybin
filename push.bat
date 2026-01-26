@@ -20,12 +20,15 @@ git status
 :: Check if there are any changes to commit (either staged or unstaged)
 set CHANGES_FOUND=false
 for /f "delims=" %%a in ('git status --porcelain') do set "CHANGES_FOUND=true"
-if "%CHANGES_FOUND%" == "false" (
-    echo.
-    echo No changes to commit. Nothing to do.
-    echo.
-    goto :skip_commit
+
+:: Process based on whether changes were found
+if "%CHANGES_FOUND%" == "true" (
+    goto :process_changes
+) else (
+    goto :no_changes
 )
+
+:process_changes
 
 git add .
 
@@ -69,10 +72,9 @@ if defined COMMIT_MSG (
     exit /b 1
 )
 
-:: Continue with the rest of the script (equivalent to :after_commit)
 goto :continue_with_push
 
-:skip_commit
+:no_changes
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mNothing to commit, skipping commit step...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
