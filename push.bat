@@ -19,7 +19,28 @@ echo. >> "%PROMPT_FILE%"
 powershell -NoProfile -Command "git diff HEAD | Out-File -FilePath '%FULL%' -Encoding UTF8; $b=[System.IO.File]::ReadAllBytes('%FULL%'); $len=[System.Math]::Min(50000,$b.Length); [System.IO.File]::WriteAllBytes('%TRUNC%',$b[0..($len-1)]); Get-Content -Encoding UTF8 -Path '%TRUNC%' | Out-File -FilePath '%PROMPT_FILE%' -Encoding UTF8 -Append; Remove-Item '%FULL%','%TRUNC%'"
 
 :: pipe prompt into agent
-type "%PROMPT_FILE%" | agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Finally perform git commit with made message."
+:: pipe prompt into agent, capture its stdout (the commit message) into a file
+set "COMMIT_OUT=%TEMP%\ai_commit_msg.txt"
+type "%PROMPT_FILE%" | agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Output ONLY the single-line commit message and then exit." > "%COMMIT_OUT%"
+
+:: read commit message
+setlocal enabledelayedexpansion
+set "AI_MSG="
+for /f "usebackq delims=" %%M in ("%COMMIT_OUT%") do set "AI_MSG=%%M"
+endlocal & set "AI_MSG=%AI_MSG%"
+
+:: show commit message in yellow
+echo %ESC%[93mAI-generated commit message:%ESC%[0m
+echo %ESC%[93m%AI_MSG%%ESC%[0m
+
+:: perform git commit with the AI message
+if not "%AI_MSG%"=="" (
+  git commit -m "%AI_MSG%"
+) else (
+  echo No commit message received from agent; aborting git commit.
+)
+
+del "%COMMIT_OUT%"
 
 del "%PROMPT_FILE%"
 
