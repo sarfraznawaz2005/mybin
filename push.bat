@@ -51,11 +51,12 @@ echo %ESC%[93mLast commit by AI:%ESC%[0m
 echo %ESC%[93m%LAST_COMMIT%%ESC%[0m
 
 git push
-if %errorlevel% neq 0 (
+set PUSH_ERROR=%errorlevel%
+if %PUSH_ERROR% neq 0 (
     echo.
-    echo Git push failed with error level %errorlevel%
+    echo Git push failed with error level %PUSH_ERROR%
     echo.
-    exit /b %errorlevel%
+    exit /b %PUSH_ERROR%
 )
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
