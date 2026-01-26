@@ -59,9 +59,11 @@ if %PUSH_RESULT% neq 0 (
     exit /b %PUSH_RESULT%
 )
 
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mDONE!%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+timeout /t 2 >nul
+
+echo %ESC%[36m----------------------------------------%ESC%[0m
+echo %ESC%[36mDONE!%ESC%[0m
+echo %ESC%[36m----------------------------------------%ESC%[0m
 
 goto :eof
 
