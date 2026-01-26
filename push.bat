@@ -23,26 +23,28 @@ powershell -NoProfile -Command "git diff HEAD | Out-File -FilePath '%FULL%' -Enc
 set "COMMIT_OUT=%TEMP%\ai_commit_msg.txt"
 type "%PROMPT_FILE%" | agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Output ONLY the single-line commit message and then exit." > "%COMMIT_OUT%"
 
-:: read commit message
+:: perform git commit using AI output file as fallback; prefer to let agent write commit via git if it already did
+:: Try to read AI's provided message; if present use it, otherwise proceed to check latest git commit
 setlocal enabledelayedexpansion
 set "AI_MSG="
 for /f "usebackq delims=" %%M in ("%COMMIT_OUT%") do set "AI_MSG=%%M"
 endlocal & set "AI_MSG=%AI_MSG%"
 
-:: show commit message in yellow
-echo %ESC%[93mAI-generated commit message:%ESC%[0m
-echo %ESC%[93m%AI_MSG%%ESC%[0m
-
-:: perform git commit with the AI message
 if not "%AI_MSG%"=="" (
   git commit -m "%AI_MSG%"
+  set "COMMITTED_MSG=%AI_MSG%"
 ) else (
-  echo No commit message received from agent; aborting git commit.
-  del "%COMMIT_OUT%"
-  del "%PROMPT_FILE%"
-  echo %ESC%[91mOperation aborted: AI did not provide a commit message.%ESC%[0m
-  exit /b 1
+  :: AI didn't output directly; assume agent may have committed itself — read the most recent commit message
+  for /f "usebackq delims=" %%C in ('git log -1 --pretty=%%s') do set "COMMITTED_MSG=%%C"
 )
+
+:: show the last committed message in yellow
+echo %ESC%[93mLast committed message:%ESC%[0m
+echo %ESC%[93m%COMMITTED_MSG%%ESC%[0m
+
+del "%COMMIT_OUT%"
+
+del "%PROMPT_FILE%"
 
 del "%COMMIT_OUT%"
 
@@ -52,3 +54,9 @@ pause
 
 git status
 git push 
+
+:: using these manual commands to verify AI actually did push
+echo %ESC%[92m-- AI Operation Verification --%ESC%[0m
+
+git status
+git push
