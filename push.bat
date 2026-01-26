@@ -106,7 +106,7 @@ powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent \"Make git c
 del "%PROMPT_FILE%"
 
 :: use PowerShell to read the commit message and strip BOM
-powershell -NoProfile -Command "$content = Get-Content -Raw -Path '%MSG_FILE%' -Encoding UTF8; $content = $content -replace '^'\"`u{EFBBBF}`"''; $content.Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII"
+powershell -NoProfile -Command "$content = Get-Content -Raw -Path '%MSG_FILE%' -Encoding UTF8; if ($content.StartsWith((0xEF,0xBB,0xBF) -join '')) { $content = $content.Substring(3) }; $content.Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII"
 
 :: read the cleaned commit message
 set /p COMMIT_MSG=<"%MSG_FILE%"
