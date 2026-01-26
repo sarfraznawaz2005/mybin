@@ -19,40 +19,16 @@ echo. >> "%PROMPT_FILE%"
 powershell -NoProfile -Command "git diff HEAD | Out-File -FilePath '%FULL%' -Encoding UTF8; $b=[System.IO.File]::ReadAllBytes('%FULL%'); $len=[System.Math]::Min(50000,$b.Length); [System.IO.File]::WriteAllBytes('%TRUNC%',$b[0..($len-1)]); Get-Content -Encoding UTF8 -Path '%TRUNC%' | Out-File -FilePath '%PROMPT_FILE%' -Encoding UTF8 -Append; Remove-Item '%FULL%','%TRUNC%'"
 
 :: pipe prompt into agent
-:: pipe prompt into agent, capture its stdout (the commit message) into a file
-set "COMMIT_OUT=%TEMP%\ai_commit_msg.txt"
-type "%PROMPT_FILE%" | agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Output ONLY the single-line commit message and then exit." > "%COMMIT_OUT%"
-
-:: perform git commit using AI output file as fallback; prefer to let agent write commit via git if it already did
-:: Try to read AI's provided message; if present use it, otherwise proceed to check latest git commit
-setlocal enabledelayedexpansion
-set "AI_MSG="
-for /f "usebackq delims=" %%M in ("%COMMIT_OUT%") do set "AI_MSG=%%M"
-endlocal & set "AI_MSG=%AI_MSG%"
-
-if not "%AI_MSG%"=="" (
-  git commit -m "%AI_MSG%"
-  set "COMMITTED_MSG=%AI_MSG%"
-) else (
-  :: AI didn't output directly; assume agent may have committed itself — read the most recent commit message
-  for /f "usebackq delims=" %%C in ('git log -1 --pretty=%%s') do set "COMMITTED_MSG=%%C"
-)
-
-:: show the last committed message in yellow
-echo %ESC%[93mLast committed message:%ESC%[0m
-echo %ESC%[93m%COMMITTED_MSG%%ESC%[0m
-
-del "%COMMIT_OUT%"
+type "%PROMPT_FILE%" | agent "Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, etc.). Finally perform git commit with made message."
 
 del "%PROMPT_FILE%"
 
 pause
 
 git status
-git push 
 
-:: using these manual commands to verify AI actually did push
-echo %ESC%[92m-- AI Operation Verification --%ESC%[0m
+:: show last commit message (from git history) in yellow before pushing
+for /f "usebackq delims=" %%M in ('git log -1 --pretty=format:%%s') do set "LAST_COMMIT=%%M"
+echo %ESC%[93m%LAST_COMMIT%%ESC%[0m
 
-git status
 git push
