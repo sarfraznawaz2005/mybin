@@ -46,7 +46,7 @@ git status
 
 :: show last commit message (from git history) in yellow before pushing
 :: get the last commit message subject directly without using temp file
-for /f "delims=" %%M in ('git log -1 --pretty=format:"%%s"') do set "LAST_COMMIT=%%M"
+for /f "delims=" %%M in ('git log -1 --pretty^=format:"%%s"') do set "LAST_COMMIT=%%M"
 echo %CYAN%[93mLast commit by AI:%CYAN%[0m
 echo %CYAN%[93m%LAST_COMMIT%%CYAN%[0m
 
@@ -59,7 +59,7 @@ if not "%PUSH_RESULT%"=="0" (
     exit /b %PUSH_RESULT%
 )
 
-timeout /t 2 >nul
+ping 127.0.0.1 -n 3 >nul
 
 echo ----------------------------------------
 echo DONE!
