@@ -65,8 +65,7 @@ if not "%PUSH_RESULT%"=="0" (
     exit /b %PUSH_RESULT%
 )
 
-ping 127.0.0.1 -n 3 >nul
-
+echo
 git push
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mDONE!%CYAN%[0m
