@@ -65,7 +65,6 @@ if not "%PUSH_RESULT%"=="0" (
     exit /b %PUSH_RESULT%
 )
 
-git push
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mDONE!%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
