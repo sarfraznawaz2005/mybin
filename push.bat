@@ -15,8 +15,6 @@ echo %CYAN%[33m----------------------------------------%CYAN%[0m
 echo %CYAN%[33mAdding Files...%CYAN%[0m
 echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
-::git status 2>nul
-
 :: Check if there are any changes to commit (either staged or unstaged)
 set CHANGES_FOUND=false
 for /f "delims=" %%a in ('git status --porcelain') do set "CHANGES_FOUND=true"
