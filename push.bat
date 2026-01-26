@@ -3,9 +3,24 @@ for /f %%a in ('echo prompt $E^| cmd') do (
   set "ESC=%%a"
 )
 
+for /f %%a in ('echo prompt $E^| cmd') do set "CYAN=%%a"
+
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mPulling Remote Changes...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
 git pull
+
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mAdd Files...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
 git status
 git add .
+
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mMaking Commit Message...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
 :: build prompt file and capture git diff HEAD truncated to 50000 bytes so we don't bombard AI with lot of context consuming our tokens!
 set "FULL=%TEMP%\git_diff_full.txt"
@@ -25,10 +40,23 @@ del "%PROMPT_FILE%"
 
 pause
 
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mPushing...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
 git status
 
 :: show last commit message (from git history) in yellow before pushing
-for /f "usebackq delims=" %%M in ('git log -1 --pretty=format:%%s') do set "LAST_COMMIT=%%M"
+:: get the last commit message subject into a temp file to avoid percent-expansion issues
+set "LAST_FILE=%TEMP%\last_commit.txt"
+git log -1 --pretty=format:%s > "%LAST_FILE%"
+for /f "usebackq delims=" %%M in ("%LAST_FILE%") do set "LAST_COMMIT=%%M"
+echo %ESC%[93mLast commit by AI:%ESC%[0m
 echo %ESC%[93m%LAST_COMMIT%%ESC%[0m
+if exist "%LAST_FILE%" del "%LAST_FILE%"
 
 git push
+
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mDONE!%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
