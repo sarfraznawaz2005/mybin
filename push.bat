@@ -54,7 +54,10 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mPushing...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
-git status 2>nul
+:: show last commit message in yellow before pushing
+for /f "delims=" %%M in ('git log -1 --pretty^=format:"%%s"') do set "LAST_COMMIT=%%M"
+echo %CYAN%[93mLast commit:%CYAN%[0m
+echo %CYAN%[93m%LAST_COMMIT%%CYAN%[0m
 
 git push
 set PUSH_RESULT=%ERRORLEVEL%
@@ -73,7 +76,6 @@ goto :eof
 
 :do_commit
 git add . 2>nul
-git status 2>nul
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mMaking Commit Message...%CYAN%[0m
@@ -109,7 +111,7 @@ if exist "%MSG_FILE%" del "%MSG_FILE%"
 
 :: Check if we got a commit message, if not abort everything
 if defined COMMIT_MSG (
-    echo %CYAN%[93m%LAST_COMMIT%%CYAN%[0m
+    echo %CYAN%[93mCommit message: %COMMIT_MSG%%CYAN%[0m
     git commit -m "%COMMIT_MSG%"
 ) else (
     echo.
