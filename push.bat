@@ -69,7 +69,8 @@ if defined COMMIT_MSG (
     exit /b 1
 )
 
-goto :after_commit
+:: Continue with the rest of the script (equivalent to :after_commit)
+goto :continue_with_push
 
 :skip_commit
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
@@ -81,7 +82,7 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mChecking for commits to push...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
-:after_commit
+:continue_with_push
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mPushing...%CYAN%[0m
