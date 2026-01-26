@@ -38,6 +38,18 @@ echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
 :done_checking
 
+:: Check if there are any commits to push
+set COMMITS_TO_PUSH=0
+for /f %%a in ('git rev-list --count @{u}..HEAD 2^>nul') do set "COMMITS_TO_PUSH=%%a"
+
+:: Only proceed with push if there are commits to push
+if "%COMMITS_TO_PUSH%"=="0" (
+    echo %CYAN%[36m----------------------------------------%CYAN%[0m
+    echo %CYAN%[36mNo commits to push, skipping push step...%CYAN%[0m
+    echo %CYAN%[36m----------------------------------------%CYAN%[0m
+    goto :eof
+)
+
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mPushing...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
