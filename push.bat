@@ -26,7 +26,7 @@ if "%CHANGES_FOUND%" == "true" (
 )
 
 echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
-echo %CLR%[38;2;255;165;0mNothing to commit, skipping commit step...%CLR%[0m
+echo %CLR%[38;2;0;255;255mNothing to commit, skipping AI commit message...%CLR%[0m
 echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
 
 :: Even if there's nothing to commit, we might still need to push if we have commits that haven't been pushed
@@ -45,6 +45,10 @@ if "%COMMITS_TO_PUSH%"=="0" (
     echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
     echo %CLR%[38;2;0;255;255mNo commits to push, skipping push step...%CLR%[0m
     echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+    
+	echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m
+	echo %CLR%[38;2;0;255;255mDONE!%CLR%[0m
+	echo %CLR%[38;2;0;255;255m----------------------------------------%CLR%[0m    
     goto :eof
 )
 
