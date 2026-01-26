@@ -5,6 +5,7 @@ for /f %%a in ('echo prompt $E^| cmd') do (
 
 for /f %%a in ('echo prompt $E^| cmd') do set "CYAN=%%a"
 
+echo %CYAN%[106m                                          CYAN%[0m
 echo %CYAN%[106mPulling Remote Changes...%CYAN%[0m
 echo %CYAN%[106m----------------------------------------%CYAN%[0m
 
