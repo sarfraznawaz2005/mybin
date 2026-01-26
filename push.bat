@@ -16,6 +16,17 @@ echo %CYAN%[36mAdd Files...%CYAN%[0m
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 
 git status
+
+:: Check if there are any changes to commit (either staged or unstaged)
+set CHANGES_FOUND=false
+for /f "delims=" %%a in ('git status --porcelain') do set "CHANGES_FOUND=true"
+if "%CHANGES_FOUND%" == "false" (
+    echo.
+    echo No changes to commit. Nothing to do.
+    echo.
+    goto :skip_commit
+)
+
 git add .
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
@@ -57,6 +68,20 @@ if defined COMMIT_MSG (
     echo.
     exit /b 1
 )
+
+goto :after_commit
+
+:skip_commit
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mNothing to commit, skipping commit step...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
+:: Even if there's nothing to commit, we might still need to push if we have commits that haven't been pushed
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[36mChecking for commits to push...%CYAN%[0m
+echo %CYAN%[36m----------------------------------------%CYAN%[0m
+
+:after_commit
 
 echo %CYAN%[36m----------------------------------------%CYAN%[0m
 echo %CYAN%[36mPushing...%CYAN%[0m
