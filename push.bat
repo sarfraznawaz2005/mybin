@@ -5,15 +5,15 @@ for /f %%a in ('echo prompt $E^| cmd') do (
 
 for /f %%a in ('echo prompt $E^| cmd') do set "CYAN=%%a"
 
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mPulling Remote Changes...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
+echo %CYAN%[33mPulling Remote Changes...%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
 git pull
 
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mAdding Files...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
+echo %CYAN%[33mAdding Files...%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
 ::git status 2>nul
 
@@ -27,14 +27,14 @@ if "%CHANGES_FOUND%" == "true" (
   goto :done_checking
 )
 
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mNothing to commit, skipping commit step...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
+echo %CYAN%[33mNothing to commit, skipping commit step...%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
 :: Even if there's nothing to commit, we might still need to push if we have commits that haven't been pushed
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mChecking for commits to push...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
+echo %CYAN%[33mChecking for commits to push...%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
 :done_checking
 
@@ -44,15 +44,15 @@ for /f %%a in ('git rev-list --count @{u}..HEAD 2^>nul') do set "COMMITS_TO_PUSH
 
 :: Only proceed with push if there are commits to push
 if "%COMMITS_TO_PUSH%"=="0" (
-    echo %CYAN%[36m----------------------------------------%CYAN%[0m
-    echo %CYAN%[36mNo commits to push, skipping push step...%CYAN%[0m
-    echo %CYAN%[36m----------------------------------------%CYAN%[0m
+    echo %CYAN%[33m----------------------------------------%CYAN%[0m
+    echo %CYAN%[33mNo commits to push, skipping push step...%CYAN%[0m
+    echo %CYAN%[33m----------------------------------------%CYAN%[0m
     goto :eof
 )
 
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mPushing...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
+echo %CYAN%[33mPushing...%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
 :: show last commit message in yellow before pushing
 for /f "delims=" %%M in ('git log -1 --pretty^=format:"%%s"') do set "LAST_COMMIT=%%M"
@@ -68,18 +68,18 @@ if not "%PUSH_RESULT%"=="0" (
     exit /b %PUSH_RESULT%
 )
 
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mDONE!%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
+echo %CYAN%[33mDONE!%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
 goto :eof
 
 :do_commit
 git add . 2>nul
 
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
-echo %CYAN%[36mMaking Commit Message...%CYAN%[0m
-echo %CYAN%[36m----------------------------------------%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
+echo %CYAN%[33mMaking Commit Message...%CYAN%[0m
+echo %CYAN%[33m----------------------------------------%CYAN%[0m
 
 :: build prompt file and capture git diff HEAD truncated to 50000 bytes so we dont bombard AI with lot of context consuming our tokens!
 set "FULL=%TEMP%\git_diff_full.txt"
