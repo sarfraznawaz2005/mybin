@@ -179,4 +179,6 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
+git status
+
 Write-Success "DONE!"
