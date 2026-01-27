@@ -143,14 +143,14 @@ set "PROMPT_FILE=%TEMP%\git_diff_prompt.txt"
 git diff --cached --stat >> "%PROMPT_FILE%"
 echo. >> "%PROMPT_FILE%"
 (echo ^(=== Diff ^(truncated if large^) ===^) ) >> "%PROMPT_FILE%"
-:: use PowerShell to write full diff to file, then write first 50000 bytes to trunc and append to prompt file
+:: use PowerShell to write full diff to file, then write first 50000 bytes (50kb) to trunc and append to prompt file
 powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' -Encoding UTF8; $b=[System.IO.File]::ReadAllBytes('%FULL%'); $len=[System.Math]::Min(50000,$b.Length); [System.IO.File]::WriteAllBytes('%TRUNC%',$b[0..($len-1)]); Get-Content -Encoding UTF8 -Path '%TRUNC%' | Out-File -FilePath '%PROMPT_FILE%' -Encoding UTF8 -Append; Remove-Item '%FULL%','%TRUNC%'"
 
 :: create a temporary file to store the commit message
 set "MSG_FILE=%TEMP%\commit_msg.txt"
 
 :: use PowerShell to pipe the prompt file to agent and capture output
-powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else.' | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
+powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else in pure txt format, no markdown, html or any other format.' | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
 
 del "%PROMPT_FILE%"
 
