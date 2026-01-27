@@ -55,11 +55,12 @@ if ($stagedFiles) {
     Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
 
     # Build prompt from git diff --cached with smart filtering
+    $promptFile = Join-Path $env:TEMP "git_diff_prompt.txt"
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
 
     # Get raw diff and filter for meaningful content
     $diffLines = git diff --cached | Out-String -Stream
-    $filteredDiff = $diffLines | Where-Object { $_.StartsWith('+') -or $_.StartsWith('-') -or $_ -match '^diff --git' -or $_ -match '^@@' } | Select-Object -First 100 | Out-String
+    $filteredDiff = $diffLines | Where-Object { $_ -match "^\+" -or $_ -match "^-" -or $_ -match "^diff" -or $_ -match "^@@" } | Select-Object -First 100 | Out-String
 
     # Create prompt with stats and filtered diff
     $stats = git diff --cached --stat | Out-String
