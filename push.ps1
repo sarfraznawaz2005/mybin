@@ -2,6 +2,7 @@
 function Write-Header {
     param([string]$Message)
     Write-Host $Message -ForegroundColor Black -BackgroundColor Cyan
+    Write-Host
 }
 
 function Write-Section {
@@ -13,16 +14,18 @@ function Write-Section {
 function Write-Error {
     param([string]$Message)
     Write-Host $Message -ForegroundColor White -BackgroundColor Red
+    Write-Host
 }
 
 function Write-Warning {
     param([string]$Message)
     Write-Host $Message -ForegroundColor Black -BackgroundColor Yellow
+    Write-Host
 }
 
 function Write-Success {
     param([string]$Message)
-    Write-Host $Message -ForegroundColor Black -BackgroundColor Green
+    Write-Section $Message
 }
 
 # Check if we're in a git repository
