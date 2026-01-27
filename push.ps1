@@ -54,13 +54,13 @@ if ($stagedFiles) {
     Write-Host "$CLR[38;2;0;255;255mMaking Commit...$CLR[0m"
     Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
 
-    # Build prompt from git diff --cached (50KB truncation ≈ 800-1000 lines)
+    # Build prompt from git diff --cached (50KB truncation ≈ 500 lines)
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
     $agentScriptFile = Join-Path $env:TEMP "agent_call.ps1"
 
-    # Get stats and diff (approx 800-1000 lines = 50KB)
+    # Get stats and diff (approx 500 lines = ~28-30KB)
     $stats = git diff --cached --stat | Out-String
-    $diffContent = git diff --cached | Select-Object -First 900 | Out-String
+    $diffContent = git diff --cached | Select-Object -First 500 | Out-String
 
     # Create a script that calls agent with diff embedded
     $scriptContent = @"
