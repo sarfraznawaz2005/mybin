@@ -21,3 +21,4 @@ Write-Host "/ Italic Heading /" -ForegroundColor White
 Write-Host "\n=== Heading 12: Mixed Colors ===" -ForegroundColor Yellow -BackgroundColor Blue
 Write-Host "\nChoose your preferred style for your project!" -ForegroundColor Green
 Write-Host "iam done, exit...."
+Write-Host "Checking Repository State..." -ForegroundColor Black -BackgroundColor Green
