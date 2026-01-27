@@ -74,7 +74,7 @@ if ($stagedFiles) {
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
-    $prompt = "Write ONE conventional commit message for the staged changes shown. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars, no markdown/html/quotes. RETURN ONLY THE COMMIT MESSAGE."
+    $prompt = "Write ONE conventional commit message for the staged changes shown. Analyze the diff: `diff --git a/file` shows modified files, `new file` means additions, `deleted file` means deletions. Lines starting with `+` are added content, `-` are removed content. Describe SPECIFICALLY what was added/changed based on the diff. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
 
     # DEBUG: Show what content is being sent
     Write-Host "--- DEBUG: Content being sent to agent ---"
