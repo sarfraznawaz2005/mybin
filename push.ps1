@@ -54,30 +54,32 @@ if ($stagedFiles) {
     Write-Host "$CLR[38;2;0;255;255mMaking Commit...$CLR[0m"
     Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
 
-    # Build prompt from git diff --cached with smart filtering
-    $promptFile = Join-Path $env:TEMP "git_diff_prompt.txt"
+    # Build prompt from git diff --cached
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
 
-    # Get raw diff and filter for meaningful content
-    $diffLines = git diff --cached | Out-String -Stream
-    $filteredDiff = $diffLines | Where-Object { $_ -match "^\+" -or $_ -match "^-" -or $_ -match "^diff" -or $_ -match "^@@" } | Select-Object -First 100 | Out-String
-
-    # Create prompt with stats and filtered diff
+    # Get stats
     $stats = git diff --cached --stat | Out-String
+
+    # Get diff content (first 50 lines) using heredoc-like approach
+    $diffLines = git diff --cached | Select-Object -First 50
+    $diffContent = ""
+    foreach ($line in $diffLines) {
+        $diffContent += $line + "`n"
+    }
+
+    # Create prompt
     $prompt = "Write ONE conventional commit message. Files changed:
 $stats
-Filtered diff:
-$filteredDiff
+Diff:
+$diffContent
 
 Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
 
-    # Call agent with filtered content
+    # Call agent with content
     $result = agent $prompt 2>&1 | Select-Object -First 1
     $result = $result.Trim()
     
     $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
-    
-    Remove-Item $promptFile -ErrorAction SilentlyContinue
 
     # Read commit message
     $commitMsg = ""
