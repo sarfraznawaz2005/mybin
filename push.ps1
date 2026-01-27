@@ -76,11 +76,6 @@ if ($stagedFiles) {
     $summary = git diff --cached --stat | Out-String
     $prompt = "Write ONE conventional commit message for these changes: $summary Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
 
-    # DEBUG: Show summary
-    Write-Host "--- DEBUG: Summary ---"
-    Write-Host $summary
-    Write-Host "--- END DEBUG ---"
-
     # Call agent with summary as prompt
     $result = agent $prompt 2>&1 | Select-Object -First 1
     $result = $result.Trim()
