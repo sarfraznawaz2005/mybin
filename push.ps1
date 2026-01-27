@@ -6,8 +6,8 @@ function Write-Header {
 }
 
 function Write-Section {
-    param([string]$Title)
-    Write-Host $Title -ForegroundColor Black -BackgroundColor Green
+    param([string]$Message)
+    Write-Host " $Message " -ForegroundColor Black -BackgroundColor Green
     Write-Host
 }
 
