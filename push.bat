@@ -150,12 +150,12 @@ powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' 
 set "MSG_FILE=%TEMP%\commit_msg.txt"
 
 :: use PowerShell to pipe the prompt file to agent and capture output
-powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else.' | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
+powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else in pure txt format, no markdown, html or any other format.' | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
 
 del "%PROMPT_FILE%"
 
-:: use PowerShell to read the commit message and strip BOM
-powershell -NoProfile -Command "$content = Get-Content -Raw -Path '%MSG_FILE%' -Encoding UTF8; if ($content.StartsWith((0xEF,0xBB,0xBF) -join '')) { $content = $content.Substring(3) }; $content.Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII"
+:: use PowerShell to read the commit message, strip BOM, and extract only first line
+powershell -NoProfile -Command "$lines = Get-Content -Path '%MSG_FILE%' -Encoding UTF8; if ($lines.Count -gt 0) { $lines[0].Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII }"
 
 :: read the cleaned commit message
 set /p COMMIT_MSG=<"%MSG_FILE%"
