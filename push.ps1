@@ -73,10 +73,8 @@ if ($LASTEXITCODE -ne 0) {
     }
 }
 
-# Adding files
-Write-Section "Adding Files..."
+# add files
 git add . 2>$null | Out-Null
-git status
 
 # Check if there are any staged changes
 $stagedFiles = git diff --cached --name-only
