@@ -102,6 +102,10 @@ try {
 }
 "@
     $scriptContent | Out-File -FilePath $agentScriptFile -Encoding UTF8
+    
+    Write-Info "-----------------------------------------------------------------------"
+    Write-Info $scriptContent
+    Write-Info "-----------------------------------------------------------------------"
 
     # Execute script with error handling
     try {
@@ -131,7 +135,7 @@ try {
         Remove-Item $msgFile -ErrorAction SilentlyContinue
     }
 
-    Write-Success $commitMsg
+    Write-Info $commitMsg
     git commit -m $commitMsg
 }
 
@@ -171,11 +175,6 @@ Write-Section "Pushing..."
 if (-not $hasUpstream) {
     git push -u origin $currentBranch
 } else {
-    # Show remote being pushed to
-    $remoteUrl = git remote get-url origin 2>$null
-    if ($remoteUrl) {
-        Write-Info "Pushing to: $remoteUrl"
-    }
     git push
 }
 
