@@ -73,13 +73,9 @@ if ($stagedFiles) {
 
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
-    $stats = git diff --cached --stat | Out-String
-    $diff = git diff --cached | Out-String -Stream | Select-Object -First 50 | Out-String
 
-    # Combine stats and limited diff content
-    $content = "Files changed: $stats
-Diff preview:
-$diff"
+    # Use the already-generated prompt file which has truncated diff
+    $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
 
     $prompt = "Write ONE conventional commit message based on these changes: $content Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
 
