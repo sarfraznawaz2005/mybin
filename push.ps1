@@ -78,6 +78,12 @@ if ($stagedFiles) {
 
 $content"
 
+    # DEBUG: Show full prompt being passed
+    Write-Host "--- DEBUG: Full prompt (length: $($fullPrompt.Length) chars) ---"
+    Write-Host $fullPrompt
+    Write-Host "--- END DEBUG ---"
+    Write-Host ""
+
     # Pass entire prompt as argument to agent
     $result = agent $fullPrompt 2>&1 | Select-Object -First 1
     $result = $result.Trim()
