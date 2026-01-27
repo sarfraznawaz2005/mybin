@@ -92,7 +92,7 @@ $diffContent
 '@
 
 try {
-    `$result = agent "Write ONE conventional commit message. Files changed: $stats Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE." 2>&1 | Select-Object -First 1
+    `$result = agent "Write ONE conventional commit message that conveys gist or the core of task instead of being generic message. Files changed: $stats Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE." 2>&1 | Select-Object -First 1
     `$result = `$result.Trim()
     Write-Output `$result
 } catch {
@@ -102,10 +102,6 @@ try {
 }
 "@
     $scriptContent | Out-File -FilePath $agentScriptFile -Encoding UTF8
-    
-    Write-Info "-----------------------------------------------------------------------"
-    Write-Info $scriptContent
-    Write-Info "-----------------------------------------------------------------------"
 
     # Execute script with error handling
     try {
