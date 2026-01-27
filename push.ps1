@@ -1,58 +1,69 @@
-# ANSI colors
-$ESC = [char]27
-$CLR = $ESC
+# Helper functions for colored output
+function Write-Header {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor Black -BackgroundColor Cyan
+}
 
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255mChecking Repository State...$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
+function Write-Section {
+    param([string]$Title)
+    Write-Host $Title -ForegroundColor Black -BackgroundColor Green
+}
+
+function Write-Error {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor White -BackgroundColor Red
+}
+
+function Write-Warning {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor Black -BackgroundColor Yellow
+}
+
+function Write-Success {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor Black -BackgroundColor Green
+}
 
 # Check if we're in a git repository
-$null = git rev-parse --git-dir 2>&1
+Write-Section "Checking Repository State..."
+git rev-parse --git-dir 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "$CLR[91mNot in a git repository. Exiting...$CLR[0m"
+    Write-Error "Not in a git repository. Exiting..."
     exit 1
 }
 
 # Check for merge conflicts
 $conflicts = git status --porcelain | Select-String "^UU"
 if ($conflicts) {
-    Write-Host "$CLR[91mMerge conflict in progress. Please resolve conflicts first. Exiting...$CLR[0m"
+    Write-Error "Merge conflict in progress. Please resolve conflicts first. Exiting..."
     exit 1
 }
 
 # Show current branch and status
 $currentBranch = git rev-parse --abbrev-ref HEAD
-Write-Host "Current branch: $CLR[93m$currentBranch$CLR[0m"
+Write-Host "Current branch: $currentBranch" -ForegroundColor Green
 
 # Show ahead/behind summary
 git status -sb
 
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255mPulling Remote Changes...$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-
+# Pulling remote changes
+Write-Section "Pulling Remote Changes..."
 git pull
 if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "$CLR[91mGit pull failed with error $LASTEXITCODE. Exiting...$CLR[0m"
-    Write-Host ""
+    Write-Error "Git pull failed with error $LASTEXITCODE. Exiting..."
     exit $LASTEXITCODE
 }
 
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255mAdding Files...$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-
-git add . 2>$null
+# Adding files
+Write-Section "Adding Files..."
+git add . 2>$null | Out-Null
 git status 2>$null | Out-Null
 
 # Check if there are any staged changes
 $stagedFiles = git diff --cached --name-only
 if ($stagedFiles) {
     # Make commit
-    Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-    Write-Host "$CLR[38;2;0;255;255mMaking Commit...$CLR[0m"
-    Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
+    Write-Section "Making Commit..."
 
     # Build prompt from git diff --cached (actual 50KB byte-based truncation)
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
@@ -88,7 +99,7 @@ try {
 "@
     $scriptContent | Out-File -FilePath $agentScriptFile -Encoding UTF8
 
-    # Execute the script with error handling
+    # Execute script with error handling
     try {
         $result = & $agentScriptFile 2>&1 | Select-Object -First 1
         $result = $result.Trim()
@@ -103,7 +114,7 @@ try {
 
         $commitMsg | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
     } catch {
-        Write-Warning "Agent execution failed. Using fallback: $_"
+        Write-Error "Agent execution failed. Using fallback: $_"
         "chore: update" | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
         $commitMsg = "chore: update"
     } finally {
@@ -116,44 +127,42 @@ try {
         Remove-Item $msgFile -ErrorAction SilentlyContinue
     }
 
-    Write-Host "$CLR[93m$commitMsg$CLR[0m"
-
+    Write-Success $commitMsg
     git commit -m $commitMsg
 }
 
 # Check for commits to push
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255mChecking for commits to push...$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
+Write-Section "Checking for commits to push..."
 
 # Check if upstream exists
-$upstreamBranch = git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>&1
-$hasUpstream = $LASTEXITCODE -eq 0
+git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "No upstream configured. Setting up upstream..."
+    $hasUpstream = $false
+} else {
+    $hasUpstream = $true
+}
 
+# Check if there are any commits to push
 $commitsToPush = 0
 if ($hasUpstream) {
     $commitsToPush = git rev-list --count "@{u}..HEAD" 2>$null
     if ([string]::IsNullOrWhiteSpace($commitsToPush)) { $commitsToPush = 0 }
 } else {
-    Write-Host "$CLR[93mNo upstream configured. Setting up upstream...$CLR[0m"
+    # If no upstream, check if there are any commits at all
     $commitsToPush = git rev-list --count HEAD 2>$null
     if ([string]::IsNullOrWhiteSpace($commitsToPush)) { $commitsToPush = 0 }
 }
 
 # Only proceed with push if there are commits to push
 if ($commitsToPush -eq 0) {
-    Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-    Write-Host "$CLR[38;2;0;255;255mNo commits to push, skipping push step...$CLR[0m"
-    Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-    Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-    Write-Host "$CLR[38;2;0;255;255mDONE!$CLR[0m"
-    Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
+    Write-Section "No commits to push, skipping push step..."
+    Write-Success "DONE!"
     exit 0
 }
 
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255mPushing...$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
+# Pushing
+Write-Section "Pushing..."
 
 if (-not $hasUpstream) {
     git push -u origin $currentBranch
@@ -161,18 +170,14 @@ if (-not $hasUpstream) {
     # Show remote being pushed to
     $remoteUrl = git remote get-url origin 2>$null
     if ($remoteUrl) {
-        Write-Host "Pushing to: $CLR[93m$remoteUrl$CLR[0m"
+        Write-Host "Pushing to: $remoteUrl" -ForegroundColor Green
     }
     git push
 }
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "$CLR[91mGit push failed with error $LASTEXITCODE$CLR[0m"
-    Write-Host ""
+    Write-Error "Git push failed with error $LASTEXITCODE"
     exit $LASTEXITCODE
 }
 
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255mDONE!$CLR[0m"
-Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
+Write-Success "DONE!"
