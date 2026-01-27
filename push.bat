@@ -106,11 +106,14 @@ echo %CLR%[38;2;0;255;255mPushing...%CLR%[0m
 echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 if "%HAS_UPSTREAM%"=="false" (
+    echo %CLR%[93mSetting upstream to origin/%CURRENT_BRANCH%...%CLR%[0m
     git push -u origin %CURRENT_BRANCH%
 ) else (
     :: Show remote being pushed to
-    for /f %%a in ('git remote get-url origin') do set "REMOTE_URL=%%a"
-    echo Pushing to: %CLR%[93m%REMOTE_URL%%CLR%[0m
+    for /f "delims=" %%a in ('git remote get-url origin') do set "REMOTE_URL=%%a"
+    if defined REMOTE_URL (
+        echo Pushing to: %CLR%[93m%REMOTE_URL%%CLR%[0m
+    )
     git push
 )
 set PUSH_RESULT=%ERRORLEVEL%
@@ -147,7 +150,7 @@ powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' 
 set "MSG_FILE=%TEMP%\commit_msg.txt"
 
 :: use PowerShell to pipe the prompt file to agent and capture output
-powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent \"Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else.\" | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
+powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else.' | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
 
 del "%PROMPT_FILE%"
 
