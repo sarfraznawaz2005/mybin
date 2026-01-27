@@ -73,24 +73,25 @@ if ($stagedFiles) {
 
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
+    $agentArgsFile = Join-Path $env:TEMP "agent_args.txt"
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
     $fullPrompt = "Analyze this git diff and write ONE conventional commit message. Look at what files were changed and what code was added/removed. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE.
 
 $content"
 
-    # DEBUG: Show full prompt being passed
-    Write-Host "--- DEBUG: Full prompt (length: $($fullPrompt.Length) chars) ---"
-    Write-Host $fullPrompt
-    Write-Host "--- END DEBUG ---"
-    Write-Host ""
+    # Write prompt to args file and call agent using argument passing
+    $fullPrompt | Out-File -FilePath $agentArgsFile -Encoding UTF8 -NoNewline
 
-    # Pass entire prompt as argument to agent
-    $result = agent $fullPrompt 2>&1 | Select-Object -First 1
+    # DEBUG: Show args file
+    Write-Host "--- DEBUG: Args file length: $((Get-Item $agentArgsFile).Length) bytes ---"
+
+    # Call agent with argument from file
+    $result = & agent (Get-Content -Raw $agentArgsFile) 2>&1 | Select-Object -First 1
     $result = $result.Trim()
     
     $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
     
-    Remove-Item $promptFile -ErrorAction SilentlyContinue
+    Remove-Item $promptFile, $agentArgsFile -ErrorAction SilentlyContinue
 
     # Read commit message
     $commitMsg = ""
