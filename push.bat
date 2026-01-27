@@ -150,7 +150,7 @@ powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' 
 set "MSG_FILE=%TEMP%\commit_msg.txt"
 
 :: use PowerShell to call agent and have it write the commit message to temp file
-powershell -NoProfile -Command "type '%PROMPT_FILE%' | agent 'Review the staged changes and write a conventional commit message to file %MSG_FILE%. The commit message must be: 1) Single line only, 2) Start with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert), 3) You may include a scope in parentheses like feat(scope):, 4) Use ! for breaking changes, 5) No markdown, HTML, quotes, or special formatting, 6) Max 100 characters. Write ONLY the commit message to the file, nothing else.'"
+powershell -NoProfile -Command "$content = Get-Content -Raw -Path '%PROMPT_FILE%'; agent \"Review these staged changes: $content Write a conventional commit message to file %MSG_FILE%. The commit message must be: 1) Single line only, 2) Start with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert), 3) You may include a scope in parentheses like feat(scope):, 4) Use ! for breaking changes, 5) No markdown, HTML, quotes, or special formatting, 6) Max 100 characters. Write ONLY the commit message to the file, nothing else.\""
 
 del "%PROMPT_FILE%"
 
