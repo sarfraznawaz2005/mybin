@@ -73,10 +73,17 @@ if ($stagedFiles) {
 
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
-    $summary = git diff --cached --stat | Out-String
-    $prompt = "Write ONE conventional commit message for these changes: $summary Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+    $stats = git diff --cached --stat | Out-String
+    $diff = git diff --cached | Out-String -Stream | Select-Object -First 50 | Out-String
 
-    # Call agent with summary as prompt
+    # Combine stats and limited diff content
+    $content = "Files changed: $stats
+Diff preview:
+$diff"
+
+    $prompt = "Write ONE conventional commit message based on these changes: $content Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+
+    # Call agent with content as prompt
     $result = agent $prompt 2>&1 | Select-Object -First 1
     $result = $result.Trim()
     
