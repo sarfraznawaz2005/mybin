@@ -150,7 +150,7 @@ powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' 
 set "MSG_FILE=%TEMP%\commit_msg.txt"
 
 :: use PowerShell to call agent and capture output to file
-powershell -NoProfile -Command "$content = Get-Content -Raw -Path '%PROMPT_FILE%'; agent \"Based on these staged changes: $content Write ONE conventional commit message. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars, no markdown/html/quotes. RETURN ONLY THE COMMIT MESSAGE.\" 2>&1 | Select-Object -First 1 | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$content = Get-Content -Raw -Path '%PROMPT_FILE%' -Encoding UTF8; $prompt = 'Based on these staged changes: ' + $content + ' Write ONE conventional commit message. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars, no markdown/html/quotes. RETURN ONLY THE COMMIT MESSAGE.'; $result = agent $prompt 2>^&1 | Select-Object -First 1; $result.Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII -NoNewline"
 
 del "%PROMPT_FILE%"
 
