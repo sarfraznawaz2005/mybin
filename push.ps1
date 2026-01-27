@@ -73,24 +73,26 @@ if ($stagedFiles) {
 
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
+    $agentInputFile = Join-Path $env:TEMP "agent_input.txt"
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
-    $agentPrompt = "Analyze this git diff and write ONE conventional commit message. Look at what files were changed and what code was added/removed. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE.
+    $fullPrompt = "Analyze this git diff and write ONE conventional commit message. Look at what files were changed and what code was added/removed. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE.
 
 $content"
 
-    # DEBUG: Show what content is being sent
-    Write-Host "--- DEBUG: Full prompt being sent to agent ---"
-    Write-Host $agentPrompt
-    Write-Host "--- END DEBUG ---"
-    Write-Host ""
+    # Write full prompt to file and use input redirection
+    $fullPrompt | Out-File -FilePath $agentInputFile -Encoding UTF8 -NoNewline
 
-    # Pass the entire prompt (including diff) to agent
-    $result = agent $agentPrompt 2>&1 | Select-Object -First 1
+    # DEBUG: Show prompt file size
+    $promptSize = (Get-Item $agentInputFile).Length
+    Write-Host "--- DEBUG: Prompt file size: $promptSize bytes ---"
+
+    # Use input redirection to pass prompt to agent
+    $result = Get-Content $agentInputFile -Raw | agent 2>&1 | Select-Object -First 1
     $result = $result.Trim()
     
     $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
     
-    Remove-Item $promptFile -ErrorAction SilentlyContinue
+    Remove-Item $promptFile, $agentInputFile -ErrorAction SilentlyContinue
 
     # Read commit message
     $commitMsg = ""
