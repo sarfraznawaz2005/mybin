@@ -155,7 +155,7 @@ powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git co
 del "%PROMPT_FILE%"
 
 :: use PowerShell to read the commit message, strip BOM, and extract only first line
-powershell -NoProfile -Command "$lines = Get-Content -Path '%MSG_FILE%' -Encoding UTF8; if ($lines.Count -gt 0) { $lines[0].Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII }"
+powershell -NoProfile -Command "$content = Get-Content -Path '%MSG_FILE%' -Encoding UTF8 -Raw; $lines = $content -split \"`r?`n\"; if ($lines.Count -gt 0) { $lines[0].Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII }"
 
 :: read the cleaned commit message
 set /p COMMIT_MSG=<"%MSG_FILE%"
