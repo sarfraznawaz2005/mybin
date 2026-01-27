@@ -74,7 +74,13 @@ if ($stagedFiles) {
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
-    $prompt = "Write ONE conventional commit message for the staged changes above. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars, no markdown/html/quotes. RETURN ONLY THE COMMIT MESSAGE."
+    $prompt = "Write ONE conventional commit message for the staged changes shown. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars, no markdown/html/quotes. RETURN ONLY THE COMMIT MESSAGE."
+
+    # DEBUG: Show what content is being sent
+    Write-Host "--- DEBUG: Content being sent to agent ---"
+    Write-Host $content
+    Write-Host "--- END DEBUG ---"
+    Write-Host ""
 
     # Pipe content to agent and get first line
     $result = $content | agent $prompt 2>&1 | Select-Object -First 1
