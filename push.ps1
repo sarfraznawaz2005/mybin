@@ -20,7 +20,7 @@ function Write-Error {
     Write-Host
 }
 
-function Write-Warning {
+function Write-Info {
     param([string]$Message)
     Write-Host
     Write-Host " $Message " -ForegroundColor Black -BackgroundColor Yellow
@@ -61,7 +61,7 @@ if ($LASTEXITCODE -ne 0) {
 # Adding files
 Write-Section "Adding Files..."
 git add . 2>$null | Out-Null
-git status 2>$null | Out-Null
+git status
 
 # Check if there are any staged changes
 $stagedFiles = git diff --cached --name-only
@@ -112,7 +112,7 @@ try {
         if ($result -match "^[a-z]+(\([a-z]+\))?:.+" -and $result.Length -le 100 -and $result.Length -gt 0) {
             $commitMsg = $result
         } else {
-            Write-Warning "Invalid commit format from agent. Using fallback."
+            Write-Info "Invalid commit format from agent. Using fallback."
             $commitMsg = "chore: update"
         }
 
@@ -141,7 +141,7 @@ Write-Section "Checking for commits to push..."
 # Check if upstream exists
 git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
-    Write-Warning "No upstream configured. Setting up upstream..."
+    Write-Info "No upstream configured. Setting up upstream..."
     $hasUpstream = $false
 } else {
     $hasUpstream = $true
@@ -174,7 +174,7 @@ if (-not $hasUpstream) {
     # Show remote being pushed to
     $remoteUrl = git remote get-url origin 2>$null
     if ($remoteUrl) {
-        Write-Host "Pushing to: $remoteUrl" -ForegroundColor Green
+        Write-Info "Pushing to: $remoteUrl"
     }
     git push
 }
