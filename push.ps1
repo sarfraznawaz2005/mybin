@@ -54,13 +54,21 @@ if ($stagedFiles) {
     Write-Host "$CLR[38;2;0;255;255mMaking Commit...$CLR[0m"
     Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
 
-    # Build prompt from git diff --cached (50KB truncation ≈ 500 lines)
+    # Build prompt from git diff --cached (actual 50KB byte-based truncation)
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
     $agentScriptFile = Join-Path $env:TEMP "agent_call.ps1"
 
-    # Get stats and diff (approx 500 lines = ~28-30KB)
+    # Get stats
     $stats = git diff --cached --stat | Out-String
-    $diffContent = git diff --cached | Select-Object -First 500 | Out-String
+
+    # Get diff and truncate to exactly 50KB using bytes
+    $diffFile = Join-Path $env:TEMP "diff_full.txt"
+    $diffTruncFile = Join-Path $env:TEMP "diff_trunc.txt"
+    git diff --cached | Out-File -FilePath $diffFile -Encoding UTF8
+    $bytes = [System.IO.File]::ReadAllBytes($diffFile)
+    $len = [Math]::Min(50000, $bytes.Length)
+    [System.IO.File]::WriteAllBytes($diffTruncFile, $bytes[0..($len-1)])
+    $diffContent = [System.IO.File]::ReadAllText($diffTruncFile, [System.Text.Encoding]::UTF8)
 
     # Create a script that calls agent with diff embedded
     $scriptContent = @"
@@ -68,20 +76,41 @@ if ($stagedFiles) {
 $diffContent
 '@
 
-agent "Write ONE conventional commit message. Files changed: $stats Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+try {
+    `$result = agent "Write ONE conventional commit message. Files changed: $stats Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE." 2>&1 | Select-Object -First 1
+    `$result = `$result.Trim()
+    Write-Output `$result
+} catch {
+    Write-Error "Agent call failed: `$_. Using fallback."
+    Write-Output "chore: update"
+    exit 1
+}
 "@
     $scriptContent | Out-File -FilePath $agentScriptFile -Encoding UTF8
 
-    # Execute the script
-    $result = & $agentScriptFile 2>&1 | Select-Object -First 1
-    $result = $result.Trim()
+    # Execute the script with error handling
+    try {
+        $result = & $agentScriptFile 2>&1 | Select-Object -First 1
+        $result = $result.Trim()
 
-    $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
+        # Validate result (basic check)
+        if ($result -match "^[a-z]+(\([a-z]+\))?:.+" -and $result.Length -le 100 -and $result.Length -gt 0) {
+            $commitMsg = $result
+        } else {
+            Write-Warning "Invalid commit format from agent. Using fallback."
+            $commitMsg = "chore: update"
+        }
 
-    Remove-Item $agentScriptFile -ErrorAction SilentlyContinue
+        $commitMsg | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
+    } catch {
+        Write-Warning "Agent execution failed. Using fallback: $_"
+        "chore: update" | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
+        $commitMsg = "chore: update"
+    } finally {
+        Remove-Item $diffFile, $diffTruncFile, $agentScriptFile -ErrorAction SilentlyContinue
+    }
 
     # Read commit message
-    $commitMsg = ""
     if (Test-Path $msgFile) {
         $commitMsg = Get-Content -Path $msgFile -Raw -Encoding ASCII
         Remove-Item $msgFile -ErrorAction SilentlyContinue
