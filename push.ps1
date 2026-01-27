@@ -60,12 +60,8 @@ if ($stagedFiles) {
     # Get stats
     $stats = git diff --cached --stat | Out-String
 
-    # Get diff content (first 50 lines) using heredoc-like approach
-    $diffLines = git diff --cached | Select-Object -First 50
-    $diffContent = ""
-    foreach ($line in $diffLines) {
-        $diffContent += $line + "`n"
-    }
+    # Get diff content (first 50 lines)
+    $diffContent = git diff --cached | Select-Object -First 50 | Out-String
 
     # Create prompt
     $prompt = "Write ONE conventional commit message. Files changed:
