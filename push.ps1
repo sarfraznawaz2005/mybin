@@ -58,23 +58,11 @@ if ($stagedFiles) {
     $promptFile = Join-Path $env:TEMP "git_diff_prompt.txt"
     "=== Summary ===" | Out-File -FilePath $promptFile -Encoding UTF8
     git diff --cached --stat | Out-File -FilePath $promptFile -Encoding UTF8 -Append
-    "" | Out-File -FilePath $promptFile -Encoding UTF8 -Append
-    "=== Diff (truncated if large) ===" | Out-File -FilePath $promptFile -Encoding UTF8 -Append
-
-    # Truncate diff to 50KB
-    $fullDiffFile = Join-Path $env:TEMP "git_diff_full.txt"
-    $truncDiffFile = Join-Path $env:TEMP "git_diff_trunc.txt"
-    git diff --cached | Out-File -FilePath $fullDiffFile -Encoding UTF8
-    $bytes = [System.IO.File]::ReadAllBytes($fullDiffFile)
-    $len = [Math]::Min(50000, $bytes.Length)
-    [System.IO.File]::WriteAllBytes($truncDiffFile, $bytes[0..($len-1)])
-    Get-Content -Encoding UTF8 -Path $truncDiffFile | Out-File -FilePath $promptFile -Encoding UTF8 -Append
-    Remove-Item $fullDiffFile, $truncDiffFile -ErrorAction SilentlyContinue
 
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
 
-    # Use the already-generated prompt file which has truncated diff
+    # Use just the stats summary (file names + line counts)
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
 
     $prompt = "Write ONE conventional commit message based on these changes: $content Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
