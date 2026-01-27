@@ -146,22 +146,47 @@ echo. >> "%PROMPT_FILE%"
 :: use PowerShell to write full diff to file, then write first 50000 bytes (50kb) to trunc and append to prompt file
 powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' -Encoding UTF8; $b=[System.IO.File]::ReadAllBytes('%FULL%'); $len=[System.Math]::Min(50000,$b.Length); [System.IO.File]::WriteAllBytes('%TRUNC%',$b[0..($len-1)]); Get-Content -Encoding UTF8 -Path '%TRUNC%' | Out-File -FilePath '%PROMPT_FILE%' -Encoding UTF8 -Append; Remove-Item '%FULL%','%TRUNC%'"
 
-:: Store current HEAD to verify commit later
-for /f %%a in ('git rev-parse HEAD') do set "BEFORE_COMMIT=%%a"
+:: create a temporary file to store the commit message
+set "MSG_FILE=%TEMP%\commit_msg.txt"
 
-:: Let agent create the commit directly
-powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' -Raw | agent 'Review the staged changes and create a git commit. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Use \"git commit -m message\" to create the commit with the appropriate message. Return only the commit message you used, nothing else.'"
+:: use PowerShell to call agent and have it write the commit message to temp file
+powershell -NoProfile -Command "type '%PROMPT_FILE%' | agent 'Review the staged changes and write a conventional commit message to file %MSG_FILE%. The commit message must be: 1) Single line only, 2) Start with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert), 3) You may include a scope in parentheses like feat(scope):, 4) Use ! for breaking changes, 5) No markdown, HTML, quotes, or special formatting, 6) Max 100 characters. Write ONLY the commit message to the file, nothing else.'"
 
 del "%PROMPT_FILE%"
 
-:: Verify if commit was made by checking if HEAD changed
-for /f %%a in ('git rev-parse HEAD') do set "AFTER_COMMIT=%%a"
-if "!BEFORE_COMMIT!"=="!AFTER_COMMIT!" (
-    echo.
-    echo %CLR%[91mNo commit was created. Falling back to generic commit...%CLR%[0m
-    git commit -m "chore: update"
-) else (
-    echo %CLR%[93mCommit created successfully%CLR%[0m
+:: Read the commit message from temp file
+set "COMMIT_MSG="
+if exist "%MSG_FILE%" (
+    set /p COMMIT_MSG=<"%MSG_FILE%"
+    del "%MSG_FILE%"
 )
 
+:: Validate commit message
+set "VALID_MSG=false"
+if defined COMMIT_MSG (
+    :: Check length (max 100 chars)
+    set /p "LEN=.<nul" | powershell -NoProfile -Command "'!COMMIT_MSG!'.Length" >nul
+    for /f %%a in ('powershell -NoProfile -Command "'!COMMIT_MSG!'.Length"') do set "MSG_LEN=%%a"
+    if !MSG_LEN! LEQ 100 (
+        :: Check for valid prefix
+        echo !COMMIT_MSG! | findstr /r /c:"^feat[(:]" /c:"^fix[(:]" /c:"^docs[(:]" /c:"^chore[(:]" /c:"^refactor[(:]" /c:"^test[(:]" /c:"^perf[(:]" /c:"^ci[(:]" /c:"^build[(:]" /c:"^style[(:]" /c:"^revert[(:]" >nul
+        if not errorlevel 1 (
+            :: Check for invalid characters (quotes, markdown, html)
+            echo !COMMIT_MSG! | findstr /r /c:"[""']" /c:"\*\*" /c:"__" /c:"<[^>]*>" /c:"^#" >nul
+            if errorlevel 1 (
+                set "VALID_MSG=true"
+            )
+        )
+    )
+)
+
+:: If invalid, fall back to generic message
+if "!VALID_MSG!"=="false" (
+    echo %CLR%[93mInvalid commit message format. Falling back to generic message...%CLR%[0m
+    set "COMMIT_MSG=chore: update"
+) else (
+    echo %CLR%[93m%COMMIT_MSG%%CLR%[0m
+)
+
+git commit -m "%COMMIT_MSG%"
 goto :eof
