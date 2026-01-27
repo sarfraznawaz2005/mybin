@@ -74,16 +74,18 @@ if ($stagedFiles) {
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
-    $prompt = "Write ONE conventional commit message for the staged changes shown. Analyze the diff: `diff --git a/file` shows modified files, `new file` means additions, `deleted file` means deletions. Lines starting with `+` are added content, `-` are removed content. Describe SPECIFICALLY what was added/changed based on the diff. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+    $agentPrompt = "Analyze this git diff and write ONE conventional commit message. Look at what files were changed and what code was added/removed. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE.
+
+$content"
 
     # DEBUG: Show what content is being sent
-    Write-Host "--- DEBUG: Content being sent to agent ---"
-    Write-Host $content
+    Write-Host "--- DEBUG: Full prompt being sent to agent ---"
+    Write-Host $agentPrompt
     Write-Host "--- END DEBUG ---"
     Write-Host ""
 
-    # Pipe content to agent and get first line
-    $result = $content | agent $prompt 2>&1 | Select-Object -First 1
+    # Pass the entire prompt (including diff) to agent
+    $result = agent $agentPrompt 2>&1 | Select-Object -First 1
     $result = $result.Trim()
     
     $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
