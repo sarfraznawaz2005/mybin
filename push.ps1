@@ -68,7 +68,7 @@ if ($stagedFiles) {
 $diffContent
 '@
 
-agent "Write ONE conventional commit message. Files changed: `$stats Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+agent "Write ONE conventional commit message. Files changed: $stats Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
 "@
     $scriptContent | Out-File -FilePath $agentScriptFile -Encoding UTF8
 
