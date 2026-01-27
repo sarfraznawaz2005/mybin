@@ -150,7 +150,7 @@ powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' 
 set "MSG_FILE=%TEMP%\commit_msg.txt"
 
 :: use PowerShell to pipe the prompt file to agent and capture output
-powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else in pure txt format, no markdown, html or any other format.' | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
+powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else in pure txt format, no markdown, html, etc.' | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
 
 del "%PROMPT_FILE%"
 
