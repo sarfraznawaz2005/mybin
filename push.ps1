@@ -9,7 +9,7 @@ function Write-Header {
 function Write-Section {
     param([string]$Message)
     Write-Host
-    Write-Host " $Message " -ForegroundColor White -BackgroundColor Cyan
+    Write-Host " $Message " -ForegroundColor Black -BackgroundColor Green
     Write-Host
 }
 
@@ -46,10 +46,6 @@ if ($conflicts) {
     Write-Error "Merge conflict in progress. Please resolve conflicts first. Exiting..."
     exit 1
 }
-
-# Show current branch and status
-$currentBranch = git rev-parse --abbrev-ref HEAD
-Write-Host "Current branch: $currentBranch" -ForegroundColor Green
 
 # Show ahead/behind summary
 git status -sb
