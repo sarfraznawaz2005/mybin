@@ -56,30 +56,29 @@ if ($stagedFiles) {
 
     # Build prompt from git diff --cached
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
+    $agentScriptFile = Join-Path $env:TEMP "agent_call.ps1"
 
-    # Get stats
+    # Get stats and diff
     $stats = git diff --cached --stat | Out-String
-
-    # DEBUG: Check if diff returns content
-    $debugDiff = git diff --cached | Out-String
-    Write-Host "DEBUG: Diff length = $($debugDiff.Length), Diff content = '$debugDiff'" -ForegroundColor Yellow
-
-    # Get diff content (first 50 lines)
     $diffContent = git diff --cached | Select-Object -First 50 | Out-String
 
-    # Create prompt
-    $prompt = "Write ONE conventional commit message. Files changed:
-$stats
-Diff:
+    # Create a script that calls agent with diff embedded
+    $scriptContent = @"
+`$diff = @'
 $diffContent
+'@
 
-Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+agent "Write ONE conventional commit message. Files changed: `$stats Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+"@
+    $scriptContent | Out-File -FilePath $agentScriptFile -Encoding UTF8
 
-    # Call agent with content
-    $result = agent $prompt 2>&1 | Select-Object -First 1
+    # Execute the script
+    $result = & $agentScriptFile 2>&1 | Select-Object -First 1
     $result = $result.Trim()
-    
+
     $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
+
+    Remove-Item $agentScriptFile -ErrorAction SilentlyContinue
 
     # Read commit message
     $commitMsg = ""
@@ -87,7 +86,7 @@ Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. S
         $commitMsg = Get-Content -Path $msgFile -Raw -Encoding ASCII
         Remove-Item $msgFile -ErrorAction SilentlyContinue
     }
-    
+
     Write-Host "$CLR[93m$commitMsg$CLR[0m"
 
     git commit -m $commitMsg
