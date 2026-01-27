@@ -54,18 +54,34 @@ if ($stagedFiles) {
     Write-Host "$CLR[38;2;0;255;255mMaking Commit...$CLR[0m"
     Write-Host "$CLR[38;2;0;255;255m--------------------------------------------------$CLR[0m"
 
-    # Build prompt from git diff --cached
+    # Build prompt from git diff --cached with 50KB truncation
     $promptFile = Join-Path $env:TEMP "git_diff_prompt.txt"
+    $diffFile = Join-Path $env:TEMP "git_diff_content.txt"
+
+    # Write truncated diff to file
+    git diff --cached | Out-File -FilePath $diffFile -Encoding UTF8
+    $bytes = [System.IO.File]::ReadAllBytes($diffFile)
+    $len = [Math]::Min(50000, $bytes.Length)
+    [System.IO.File]::WriteAllBytes($diffFile, $bytes[0..($len-1)])
+
+    # Write summary and file reference
     "=== Summary ===" | Out-File -FilePath $promptFile -Encoding UTF8
     git diff --cached --stat | Out-File -FilePath $promptFile -Encoding UTF8 -Append
+    "" | Out-File -FilePath $promptFile -Encoding UTF8 -Append
+    "=== Diff Content (50KB truncated) ===" | Out-File -FilePath $promptFile -Encoding UTF8 -Append
+    Get-Content -Raw -Path $diffFile -Encoding UTF8 | Out-File -FilePath $promptFile -Encoding UTF8 -Append
 
     # Call agent to get commit message
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
 
-    # Use just the stats summary (file names + line counts)
-    $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
+    # Use Select-String to read diff content efficiently
+    $diffContent = Get-Content -Raw -Path $diffFile -Encoding UTF8
 
-    $prompt = "Write ONE conventional commit message based on these changes: $content Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
+    # Create concise prompt with diff embedded
+    $prompt = "Write ONE conventional commit message based on this git diff:
+$diffContent
+
+Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars. RETURN ONLY THE COMMIT MESSAGE."
 
     # Call agent with content as prompt
     $result = agent $prompt 2>&1 | Select-Object -First 1
@@ -73,7 +89,7 @@ if ($stagedFiles) {
     
     $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
     
-    Remove-Item $promptFile -ErrorAction SilentlyContinue
+    Remove-Item $promptFile, $diffFile -ErrorAction SilentlyContinue
 
     # Read commit message
     $commitMsg = ""
