@@ -9,7 +9,7 @@ function Write-Header {
 function Write-Section {
     param([string]$Message)
     Write-Host
-    Write-Host " $Message " -ForegroundColor Black -BackgroundColor Cyan
+    Write-Host " $Message " -ForegroundColor White -BackgroundColor Cyan
     Write-Host
 }
 
