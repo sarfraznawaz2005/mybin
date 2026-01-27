@@ -76,12 +76,9 @@ if ($stagedFiles) {
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
     $prompt = "Write ONE conventional commit message for the staged changes above. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars, no markdown/html/quotes. RETURN ONLY THE COMMIT MESSAGE."
 
-    # Pipe content to agent
-    $result = $content | agent $prompt 2>&1
-    $result = $result | Select-Object -First 1
+    # Pipe content to agent and get first line
+    $result = $content | agent $prompt 2>&1 | Select-Object -First 1
     $result = $result.Trim()
-    
-    Write-Host "Agent returned: '$result'"
     
     $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
     
