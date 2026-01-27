@@ -75,9 +75,14 @@ if ($stagedFiles) {
     $msgFile = Join-Path $env:TEMP "commit_msg.txt"
     $content = Get-Content -Raw -Path $promptFile -Encoding UTF8
     $prompt = "Based on these staged changes: $content Write ONE conventional commit message. Format: type(scope): description. Use feat, fix, docs, chore, refactor, test, perf, ci, build, style, or revert. Single line, max 100 chars, no markdown/html/quotes. RETURN ONLY THE COMMIT MESSAGE."
+
+    $result = agent $prompt 2>&1
+    $result = $result | Select-Object -First 1
+    $result = $result.Trim()
     
-    $result = agent $prompt 2>&1 | Select-Object -First 1
-    $result.Trim() | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
+    Write-Host "Agent returned: '$result'"
+    
+    $result | Out-File -FilePath $msgFile -Encoding ASCII -NoNewline
     
     Remove-Item $promptFile -ErrorAction SilentlyContinue
 
@@ -87,34 +92,8 @@ if ($stagedFiles) {
         $commitMsg = Get-Content -Path $msgFile -Raw -Encoding ASCII
         Remove-Item $msgFile -ErrorAction SilentlyContinue
     }
-
-    # Validate commit message
-    $validMsg = $false
-    if ($commitMsg) {
-        $msgLen = $commitMsg.Length
-        if ($msgLen -le 100 -and $msgLen -gt 0) {
-            # Check for valid prefix
-            $validPrefixes = @('feat', 'fix', 'docs', 'chore', 'refactor', 'test', 'perf', 'ci', 'build', 'style', 'revert')
-            foreach ($prefix in $validPrefixes) {
-                if ($commitMsg -match "^${prefix}[\(:]") {
-                    $validMsg = $true
-                    break
-                }
-            }
-            # Check for invalid characters
-            if ($commitMsg -match "[\""']|\*\*|__|<[^>]*>|^#") {
-                $validMsg = $false
-            }
-        }
-    }
-
-    # Fallback to generic message if invalid
-    if (-not $validMsg) {
-        Write-Host "$CLR[93mInvalid commit message format. Falling back to generic message...$CLR[0m"
-        $commitMsg = "chore: update"
-    } else {
-        Write-Host "$CLR[93m$commitMsg$CLR[0m"
-    }
+    
+    Write-Host "$CLR[93m$commitMsg$CLR[0m"
 
     git commit -m $commitMsg
 }
