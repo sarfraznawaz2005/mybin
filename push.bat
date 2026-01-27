@@ -132,7 +132,7 @@ goto :eof
 
 :do_commit
 echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
-echo %CLR%[38;2;0;255;255mMaking Commit Message...%CLR%[0m
+echo %CLR%[38;2;0;255;255mMaking Commit...%CLR%[0m
 echo %CLR%[38;2;0;255;255m--------------------------------------------------%CLR%[0m
 
 :: build prompt file and capture git diff --cached truncated to 50000 bytes
@@ -146,54 +146,22 @@ echo. >> "%PROMPT_FILE%"
 :: use PowerShell to write full diff to file, then write first 50000 bytes (50kb) to trunc and append to prompt file
 powershell -NoProfile -Command "git diff --cached | Out-File -FilePath '%FULL%' -Encoding UTF8; $b=[System.IO.File]::ReadAllBytes('%FULL%'); $len=[System.Math]::Min(50000,$b.Length); [System.IO.File]::WriteAllBytes('%TRUNC%',$b[0..($len-1)]); Get-Content -Encoding UTF8 -Path '%TRUNC%' | Out-File -FilePath '%PROMPT_FILE%' -Encoding UTF8 -Append; Remove-Item '%FULL%','%TRUNC%'"
 
-:: create a temporary file to store the commit message
-set "MSG_FILE=%TEMP%\commit_msg.txt"
+:: Store current HEAD to verify commit later
+for /f %%a in ('git rev-parse HEAD') do set "BEFORE_COMMIT=%%a"
 
-:: use PowerShell to pipe the prompt file to agent and capture output
-powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' -Raw | agent 'Make git commit message. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Return only the commit message, nothing else in pure txt format, no markdown, html or any other format.' 2>&1 | Out-File -FilePath '%MSG_FILE%' -Encoding UTF8"
+:: Let agent create the commit directly
+powershell -NoProfile -Command "Get-Content '%PROMPT_FILE%' -Raw | agent 'Review the staged changes and create a git commit. The commit message must be a single line starting with a conventional commit prefix (feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert). You may include a scope in parentheses like feat(scope):. Use ! for breaking changes. Use \"git commit -m message\" to create the commit with the appropriate message. Return only the commit message you used, nothing else.'"
 
 del "%PROMPT_FILE%"
 
-:: use PowerShell to read the commit message, strip BOM, and extract only first line
-powershell -NoProfile -Command "$content = Get-Content -Path '%MSG_FILE%' -Encoding UTF8 -Raw; $lines = $content -split \"`r?`n\"; if ($lines.Count -gt 0) { $lines[0].Trim() | Out-File -FilePath '%MSG_FILE%' -Encoding ASCII }"
-
-:: read the cleaned commit message
-set /p COMMIT_MSG=<"%MSG_FILE%"
-
-:: delete the temp file
-if exist "%MSG_FILE%" del "%MSG_FILE%"
-
-:: Validate commit message
-set "VALID_MSG=false"
-if defined COMMIT_MSG (
-    :: Check if it's a single line (no newlines)
-    echo !COMMIT_MSG! | findstr /r /c:"[\r\n]" >nul
-    if errorlevel 1 (
-        :: Check length (max 100 chars)
-        set /p "LEN=.<nul" | powershell -NoProfile -Command "'!COMMIT_MSG!'.Length" >nul
-        for /f %%a in ('powershell -NoProfile -Command "'!COMMIT_MSG!'.Length"') do set "MSG_LEN=%%a"
-        if !MSG_LEN! LEQ 100 (
-            :: Check for valid prefix
-            echo !COMMIT_MSG! | findstr /r /c:"^feat[(:]" /c:"^fix[(:]" /c:"^docs[(:]" /c:"^chore[(:]" /c:"^refactor[(:]" /c:"^test[(:]" /c:"^perf[(:]" /c:"^ci[(:]" /c:"^build[(:]" /c:"^style[(:]" /c:"^revert[(:]" >nul
-            if not errorlevel 1 (
-                :: Check for invalid characters (quotes, markdown, html)
-                echo !COMMIT_MSG! | findstr /r /c:"[""']" /c:"\*\*" /c:"__" /c:"<[^>]*>" >nul
-                if errorlevel 1 (
-                    set "VALID_MSG=true"
-                )
-            )
-        )
-    )
-)
-
-:: If invalid, fall back to generic message
-if "!VALID_MSG!"=="false" (
-    echo %CLR%[93mInvalid commit message format. Falling back to generic message...%CLR%[0m
-    set "COMMIT_MSG=chore: update"
-    echo %CLR%[93m%COMMIT_MSG%%CLR%[0m
+:: Verify if commit was made by checking if HEAD changed
+for /f %%a in ('git rev-parse HEAD') do set "AFTER_COMMIT=%%a"
+if "!BEFORE_COMMIT!"=="!AFTER_COMMIT!" (
+    echo.
+    echo %CLR%[91mNo commit was created. Falling back to generic commit...%CLR%[0m
+    git commit -m "chore: update"
 ) else (
-    echo %CLR%[93m%COMMIT_MSG%%CLR%[0m
+    echo %CLR%[93mCommit created successfully%CLR%[0m
 )
 
-git commit -m "%COMMIT_MSG%"
 goto :eof
