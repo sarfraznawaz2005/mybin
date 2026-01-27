@@ -60,6 +60,10 @@ if ($stagedFiles) {
     # Get stats
     $stats = git diff --cached --stat | Out-String
 
+    # DEBUG: Check if diff returns content
+    $debugDiff = git diff --cached | Out-String
+    Write-Host "DEBUG: Diff length = $($debugDiff.Length), Diff content = '$debugDiff'" -ForegroundColor Yellow
+
     # Get diff content (first 50 lines)
     $diffContent = git diff --cached | Select-Object -First 50 | Out-String
 
