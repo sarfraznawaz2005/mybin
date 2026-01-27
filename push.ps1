@@ -1,25 +1,29 @@
 # Helper functions for colored output
 function Write-Header {
     param([string]$Message)
-    Write-Host $Message -ForegroundColor Black -BackgroundColor Cyan
+    Write-Host
+    Write-Host " $Message " -ForegroundColor Black -BackgroundColor Cyan
     Write-Host
 }
 
 function Write-Section {
     param([string]$Message)
+    Write-Host
     Write-Host " $Message " -ForegroundColor Black -BackgroundColor Green
     Write-Host
 }
 
 function Write-Error {
     param([string]$Message)
-    Write-Host $Message -ForegroundColor White -BackgroundColor Red
+    Write-Host
+    Write-Host " $Message " -ForegroundColor White -BackgroundColor Red
     Write-Host
 }
 
 function Write-Warning {
     param([string]$Message)
-    Write-Host $Message -ForegroundColor Black -BackgroundColor Yellow
+    Write-Host
+    Write-Host " $Message " -ForegroundColor Black -BackgroundColor Yellow
     Write-Host
 }
 
