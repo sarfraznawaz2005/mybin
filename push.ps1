@@ -86,14 +86,14 @@ if ($stagedFiles) {
     $stats = git diff --cached --stat | Out-String
 
     # Build prompt for agent - let agent handle diff internally
-    $prompt = "Analyze the currently staged changes in this git repository and write a conventional commit message.
+    $prompt = "Carefully analyze the currently staged changes in this git repository and write a correct conventional commit message based on changes/diff.
 
 To see what changed, run: git diff --cached
 
 Stats:
 $stats
 
-Format: type: description (lowercase type, lowercase description, max 100 chars)
+Format: type: description (single-line, lowercase type, lowercase description, max 100 chars)
 
 Types: feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert
 
