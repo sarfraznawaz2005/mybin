@@ -97,7 +97,7 @@ Format: type: description (single-line, lowercase type, lowercase description, m
 
 Types: feat, fix, docs, chore, refactor, test, perf, ci, build, style, revert
 
-Return ONLY the commit message, nothing else."
+Return ONLY the commit message, nothing else. Remember it must be single-line, lowercase type, lowercase description, max 100 chars."
 
     $promptFile = Join-Path $env:TEMP "commit_prompt.txt"
     $prompt | Out-File -FilePath $promptFile -Encoding UTF8
